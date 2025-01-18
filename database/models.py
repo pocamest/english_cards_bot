@@ -11,7 +11,7 @@ class Base(DeclarativeBase):
 class User(Base):
     __tablename__ = 'users'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     user_name: Mapped[str] = mapped_column(String(255))
     tg_id: Mapped[int] = mapped_column(
         BigInteger, nullable=False, unique=True
@@ -32,7 +32,7 @@ class User(Base):
 class UserWord(Base):
     __tablename__ = 'user_words'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     word: Mapped[str] = mapped_column(
         String(255), nullable=False
     )
@@ -57,7 +57,7 @@ class UserWord(Base):
 class DefaultWord(Base):
     __tablename__ = 'default_words'
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     word: Mapped[str] = mapped_column(
         String(255), nullable=False, unique=True
     )
