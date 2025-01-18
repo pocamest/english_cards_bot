@@ -2,7 +2,7 @@ from sqlalchemy.orm import (
     Mapped, mapped_column, relationship
 )
 from sqlalchemy import String, BigInteger, ForeignKey
-from database.engine import Base
+from database.core import Base
 
 
 class User(Base):
