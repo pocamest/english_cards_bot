@@ -11,10 +11,10 @@ class Base(DeclarativeBase):
 class DataBase:
     def __init__(self, url: str) -> None:
         self.engine = create_async_engine(url, echo=True)
-        self.session = async_sessionmaker(
+        self.session_factory = async_sessionmaker(
             bind=self.engine, class_=AsyncSession, expire_on_commit=False
         )
 
-    async def create_db(self) -> None:
+    async def create_db(self):
         async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
