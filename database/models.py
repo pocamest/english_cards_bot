@@ -18,6 +18,14 @@ class User(Base):
         back_populates='user',
         cascade='all, delete-orphan'
     )
+    user_ignored_words: Mapped[list['UserIgnoredWord']] = relationship(
+        back_populates='user',
+        cascade='all, delete-orphan'
+    )
+    user_temporary_words: Mapped[list['UserTemporaryWord']] = relationship(
+        back_populates='user',
+        cascade='all, delete-orphan'
+    )
 
     def __repr__(self):
         return (
@@ -62,8 +70,60 @@ class DefaultWord(Base):
         String(255), nullable=False
     )
 
+    user_ignored_words: Mapped[list['UserIgnoredWord']] = relationship(
+        back_populates='default_word',
+        cascade='all, delete-orphan'
+    )
+
     def __repr__(self):
         return (
             f'DefaultWord(id={self.id}, word={self.word!r},'
             f'translation={self.translation!r})'
+        )
+
+
+class UserIgnoredWord(Base):
+    __tablename__ = 'user_ignored_words'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey('users.id'), nullable=False
+    )
+    word_id: Mapped[int] = mapped_column(
+        ForeignKey('default_words.id'), nullable=False
+    )
+
+    user: Mapped['User'] = relationship(
+        back_populates='user_ignored_words'
+    )
+    default_word: Mapped['DefaultWord'] = relationship(
+        back_populates='user_ignored_words'
+    )
+
+    def __repr__(self):
+        return (
+            f'UserIgnoredWord(id={self.id}, '
+            f'user_id={self.user_id}, word_id={self.word_id})'
+        )
+
+
+class UserTemporaryWord(Base):
+    __tablename__ = 'user_temporary_words'
+
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey('users.id'), nullable=False
+    )
+    word: Mapped[str] = mapped_column(String(255), nullable=False)
+    translation: Mapped[str] = mapped_column(String(255), nullable=False)
+    is_used: Mapped[bool] = mapped_column(default=False)
+
+    user: Mapped['User'] = relationship(
+        back_populates='user_temporary_words'
+    )
+
+    def __repr__(self):
+        return (
+            f'UserTemporaryWord(id={self.id}, user_id={self.user_id}, '
+            f'word={self.word!r}, translation={self.translation!r})'
         )
