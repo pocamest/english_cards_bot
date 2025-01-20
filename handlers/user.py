@@ -16,11 +16,14 @@ logger = logging.getLogger(__name__)
 @router.message(CommandStart())
 async def process_command_start(message: Message, session: AsyncSession):
     if message.from_user:
-        await orm_add_user(
-            session,
-            user_name=message.from_user.first_name,
-            tg_id=message.from_user.id
-        )
-        await message.answer(text=LEXICON['/start'])
+        try:
+            await orm_add_user(
+                session,
+                user_name=message.from_user.first_name,
+                tg_id=message.from_user.id
+            )
+            await message.answer(text=LEXICON['/start'])
+        except Exception as e:
+            logger.exception(f"Ошибка при обработке команды /start: {e}")
     else:
         logger.warning('Ошибка: невозможно определить отправителя сообщения')
