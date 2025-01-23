@@ -1,10 +1,10 @@
 LEXICON: dict[str, str] = {
     '/start': 'Привет! Я бот для изучения английского языка.',
     '/help': 'Здесь будет список доступных команд',
-    '/beginning': 'На данный момент в колоде <n> карточек, начать тренировку?',
-    'beginning_without_training': 'Начать',
+    '/beginning_without_training': 'На данный момент в колоде <n> карточек, начать тренировку?',
+    'begintraining': 'Начать',
     'cancel_training': 'Отмена',
-    'beginning_with_training': (
+    '/beginning_with_training': (
         'Вы уже начинали тренировку,'
         ' продолжить ее или начать новую?'
     ),

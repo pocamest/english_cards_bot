@@ -56,7 +56,7 @@ async def process_beginning_without_training(
 )
 async def process_beginning_with_training(message: Message):
     await message.answer(
-        text=LEXICON['beginning_with_training'],
+        text=LEXICON['/beginning_with_training'],
         reply_markup=create_beginning_keyboard(
             'continue_training', 'begin_new_training'
         )
