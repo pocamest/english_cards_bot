@@ -4,7 +4,7 @@ from aiogram.types import Message
 
 from lexicon import LEXICON
 
-from database import orm_add_user
+from database import add_user
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from keyboards import create_beginning_keyboard
@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 async def process_start(message: Message, session: AsyncSession):
     if message.from_user:
         try:
-            await orm_add_user(
+            await add_user(
                 session,
                 user_name=message.from_user.first_name,
                 tg_id=message.from_user.id

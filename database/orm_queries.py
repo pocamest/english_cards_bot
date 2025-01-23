@@ -13,7 +13,7 @@ async def _get_user(session: AsyncSession, tg_id: int):
     return res.scalars().first()
 
 
-async def orm_add_user(session: AsyncSession, user_name: str, tg_id: int):
+async def add_user(session: AsyncSession, user_name: str, tg_id: int):
     existing_user = await _get_user(session, tg_id)
     if existing_user:
         logger.info(f"Пользователь с tg_id={tg_id} уже существует.")
@@ -25,7 +25,7 @@ async def orm_add_user(session: AsyncSession, user_name: str, tg_id: int):
             logger.debug(f'Добавлен пользователь {new_user!r}')
         except SQLAlchemyError as e:
             await session.rollback()
-            logger.error(
+            logger.exception(
                 f'Ошибка при добавлении пользователя {user_name!r},'
                 f' tg_id={tg_id}: {e}'
             )
