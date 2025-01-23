@@ -29,3 +29,17 @@ async def add_user(session: AsyncSession, user_name: str, tg_id: int):
                 f'Ошибка при добавлении пользователя {user_name!r},'
                 f' tg_id={tg_id}: {e}'
             )
+
+
+async def add_default_words(
+    session: AsyncSession, word_pairs: list[dict[str, str]]
+):
+    try:
+        default_words = [DefaultWord(**word_pair) for word_pair in word_pairs]
+        session.add_all(default_words)
+        await session.commit()
+    except SQLAlchemyError as e:
+        await session.rollback()
+        logger.exception(
+            f'Ошибка при добавлении карточек по умолчанию: {e}'
+        )

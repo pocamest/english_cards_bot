@@ -2,13 +2,25 @@ import asyncio
 import logging
 
 from aiogram import Bot, Dispatcher
-from database import DataBase
+from database import DataBase, add_default_words
 from config_data import load_config, Config
 from handlers import router
 from middlewares import DataBaseMiddleware
 from aiogram.fsm.storage.memory import MemoryStorage
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_WORDS = [
+    {"word": "белый", "translation": "white"},
+    {"word": "чёрный", "translation": "black"},
+    {"word": "красный", "translation": "red"},
+    {"word": "синий", "translation": "blue"},
+    {"word": "зелёный", "translation": "green"},
+    {"word": "жёлтый", "translation": "yellow"},
+    {"word": "оранжевый", "translation": "orange"},
+    {"word": "фиолетовый", "translation": "purple"},
+    {"word": "розовый", "translation": "pink"},
+    {"word": "серый", "translation": "gray"}]
 
 
 async def main():
@@ -30,10 +42,14 @@ async def main():
     bot = Bot(token=config.tg_bot.token)
     dp = Dispatcher(storage=storage)
 
-    router.message.middleware(DataBaseMiddleware(db.session_factory))
+    session_factory = db.session_factory
+    router.message.middleware(DataBaseMiddleware(session_factory))
     dp.include_router(router)
 
     await db.create_db()
+    if False:
+        async with session_factory() as session:
+            await add_default_words(session, DEFAULT_WORDS)
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
