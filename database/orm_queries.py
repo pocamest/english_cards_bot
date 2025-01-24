@@ -8,12 +8,8 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-async def _get_user(session: AsyncSession, tg_id: int):
-    return await session.scalar(select(User).filter_by(tg_id=tg_id))
-
-
 async def add_user(session: AsyncSession, user_name: str, tg_id: int):
-    existing_user = await _get_user(session, tg_id)
+    existing_user = await session.scalar(select(User).filter_by(tg_id=tg_id))
     if existing_user:
         logger.info(f"Пользователь с tg_id={tg_id} уже существует.")
     else:
