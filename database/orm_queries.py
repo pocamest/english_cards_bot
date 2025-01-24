@@ -9,8 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 async def _get_user(session: AsyncSession, tg_id: int):
-    res = await session.execute(select(User).filter_by(tg_id=tg_id))
-    return res.scalars().first()
+    return await session.scalar(select(User).filter_by(tg_id=tg_id))
 
 
 async def add_user(session: AsyncSession, user_name: str, tg_id: int):
