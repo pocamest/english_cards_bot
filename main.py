@@ -43,7 +43,7 @@ async def main():
     dp = Dispatcher(storage=storage)
 
     session_factory = db.session_factory
-    router.message.middleware(DataBaseMiddleware(session_factory))
+    dp.update.middleware(DataBaseMiddleware(session_factory))
     dp.include_router(router)
 
     await db.create_db()
