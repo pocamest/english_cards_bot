@@ -4,7 +4,7 @@ from aiogram.types import Message
 
 from lexicon import LEXICON
 
-from database import add_user
+from database import add_user, get_all_words
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from keyboards import create_beginning_keyboard
@@ -20,18 +20,16 @@ logger = logging.getLogger(__name__)
 
 @router.message(CommandStart())
 async def process_start(message: Message, session: AsyncSession):
-    if message.from_user:
-        try:
-            await add_user(
-                session,
-                user_name=message.from_user.first_name,
-                tg_id=message.from_user.id
-            )
-            await message.answer(text=LEXICON['/start'])
-        except Exception as e:
-            logger.exception(f"Ошибка при обработке команды /start: {e}")
-    else:
-        logger.warning('Ошибка: невозможно определить отправителя сообщения')
+    try:
+        await add_user(
+            session,
+            user_name=message.from_user.first_name,
+            tg_id=message.from_user.id
+        )
+        await message.answer(text=LEXICON['/start'])
+    except Exception as e:
+        logger.exception(f"Ошибка при обработке команды /start: {e}")
+
 
 
 @router.message(Command(commands=['help']))
@@ -43,8 +41,9 @@ async def process_help(message: Message, session: AsyncSession):
 async def process_beginning_without_training(
     message: Message, session: AsyncSession
 ):
+    words = await get_all_words(session, message.from_user.id)
     await message.answer(
-        text=LEXICON['/beginning_without_training'],
+        text=LEXICON['/beginning_without_training'].format(len(words)),
         reply_markup=create_beginning_keyboard(
             'begin_training', 'cancel_training'
         )
