@@ -9,5 +9,8 @@ def get_translation_optionals(
         value for key, value in cards.items()
         if key != word and value != translation
     ]
-    optional_translation = random.sample(other_translation, 3)
+    optional_translation = random.sample(
+        other_translation,
+        min(3, len(other_translation))
+    )
     return translation, optional_translation
