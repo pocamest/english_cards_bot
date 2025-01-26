@@ -1,1 +1,1 @@
-import .services import get_translation_optionals
+from .services import get_translation_optionals
