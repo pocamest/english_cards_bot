@@ -61,7 +61,7 @@ async def get_all_words(session: AsyncSession, tg_id: int):
         )
         union_query = union_all(user_words_query, default_words_query)
         res = await session.execute(union_query)
-        return res.fetchall()
+        return dict(res.fetchall())
     except SQLAlchemyError as e:
         logger.exception(f'Ошибка при выполнении запроса к базе данных: {e}')
-        return []
+        return {}
