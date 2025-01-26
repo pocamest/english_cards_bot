@@ -1,16 +1,22 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import CommandStart, Command, StateFilter
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 
 from lexicon import LEXICON
 
 from database import add_user, get_all_words
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from keyboards import create_beginning_keyboard
+from keyboards import (
+    create_beginning_keyboard,
+    create_training_keyboard
+)
 
 from aiogram.fsm.state import default_state
+from aiogram.fsm.context import FSMContext
 from states import Training
+
+from services import get_translation_optionals
 
 import logging
 
@@ -48,6 +54,31 @@ async def process_beginning_without_training(
             'begin_training', 'cancel_training'
         )
     )
+
+
+@router.callback_query(F.data == 'begin_training', StateFilter(default_state))
+async def process_begin_training_press(
+    callback: CallbackQuery, session: AsyncSession, state: FSMContext
+):
+    await state.set_state(Training.exists_training)
+    cards = await get_all_words(session, callback.from_user.id)
+    words = iter(cards)
+    await state.update_data(cards=cards, words=words)
+    word = next(words)
+    translation, optionals = get_translation_optionals(cards, word)
+    await callback.message.edit_text(
+        text=LEXICON['training_text'].format(word),
+        reply_markup=create_training_keyboard(
+            translation, optionals
+        )
+    )
+
+
+@router.callback_query(F.data == 'cancel_training', StateFilter(default_state))
+async def process_cancel_training_press(
+    callback: CallbackQuery, session: AsyncSession
+):
+    await callback.message.edit_text(text=LEXICON['cancel_training_text'])
 
 
 @router.message(
