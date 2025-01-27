@@ -55,10 +55,13 @@ async def process_beginning_without_training(
     )
 
 
-@router.callback_query(F.data == 'begin_training', StateFilter(default_state))
+@router.callback_query(
+    F.data.in_(['begin_training', 'begin_new_training'])
+)
 async def process_begin_training_press(
     callback: CallbackQuery, session: AsyncSession, state: FSMContext
 ):
+    await state.clear()
     await state.set_state(Training.exists_training)
 
     word_translations = await get_all_words(session, callback.from_user.id)
@@ -135,7 +138,17 @@ async def process_cancel_training_press(
 async def process_beginning_with_training(message: Message):
     await message.answer(
         text=LEXICON['/beginning_with_training'],
-        reply_markup=create_beginning_keyboard(
-            'continue_training', 'begin_new_training'
-        )
+        reply_markup=create_beginning_keyboard('begin_new_training')
+    )
+
+
+@router.callback_query(
+    F.data == 'end_training', StateFilter(Training.exists_training)
+)
+async def process_end_training_press(
+    callback: CallbackQuery, state: FSMContext
+):
+    await state.clear()
+    await callback.message.edit_text(
+        text=LEXICON['end_training_text']
     )

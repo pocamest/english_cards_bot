@@ -5,6 +5,7 @@ from sqlalchemy import union_all
 
 from database import User, UserWord, DefaultWord, UserIgnoredWord
 import logging
+import random
 
 logger = logging.getLogger(__name__)
 
@@ -60,8 +61,10 @@ async def get_all_words(session: AsyncSession, tg_id: int):
             .filter(UserIgnoredWord.id == None)
         )
         union_query = union_all(user_words_query, default_words_query)
-        res = await session.execute(union_query)
-        return dict(res.fetchall())
+        result = await session.execute(union_query)
+        result_list = result.fetchall()
+        random.shuffle(result_list)
+        return dict(result_list)
     except SQLAlchemyError as e:
         logger.exception(f'Ошибка при выполнении запроса к базе данных: {e}')
         return {}
