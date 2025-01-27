@@ -46,9 +46,11 @@ async def process_help(message: Message, session: AsyncSession):
 async def process_beginning_without_training(
     message: Message, session: AsyncSession
 ):
-    words = await get_all_words(session, message.from_user.id)
+    word_translations = await get_all_words(session, message.from_user.id)
     await message.answer(
-        text=LEXICON['/beginning_without_training'].format(len(words)),
+        text=LEXICON['/beginning_without_training'].format(
+            len(word_translations)
+        ),
         reply_markup=create_beginning_keyboard(
             'begin_training', 'cancel_training'
         )
