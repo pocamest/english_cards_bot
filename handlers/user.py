@@ -34,8 +34,7 @@ async def process_start(message: Message, session: AsyncSession):
         )
         await message.answer(text=LEXICON['/start'])
     except Exception as e:
-        logger.exception(f"Ошибка при обработке команды /start: {e}")
-
+        logger.exception(f'Ошибка при обработке команды /start: {e}')
 
 
 @router.message(Command(commands=['help']))
@@ -61,17 +60,58 @@ async def process_begin_training_press(
     callback: CallbackQuery, session: AsyncSession, state: FSMContext
 ):
     await state.set_state(Training.exists_training)
-    cards = await get_all_words(session, callback.from_user.id)
-    words = iter(cards)
-    await state.update_data(cards=cards, words=words)
-    word = next(words)
-    translation, optionals = get_translation_optionals(cards, word)
+
+    word_translations = await get_all_words(session, callback.from_user.id)
+    word_iter = iter(word_translations)
+
+    await state.update_data(
+        word_translations=word_translations, word_iter=word_iter
+    )
+
+    current_word = next(word_iter)
+
+    translation, optionals = get_translation_optionals(
+        word_translations, current_word
+    )
     await callback.message.edit_text(
-        text=LEXICON['training_text'].format(word),
+        text=LEXICON['training_text'].format(current_word),
         reply_markup=create_training_keyboard(
             translation, optionals
         )
     )
+
+
+@router.callback_query(
+    F.data == 'right_answer', StateFilter(Training.exists_training)
+)
+async def process_right_answer_press(
+    callback: CallbackQuery, state: FSMContext
+):
+    try:
+        await callback.answer(text=LEXICON['right_answer_text'])
+        data = await state.get_data()
+
+        word_iter = data['word_iter']
+        word_translations = data['word_translations']
+
+        current_word = next(word_iter)
+
+        translation, optionals = get_translation_optionals(
+            word_translations, current_word
+        )
+        await callback.message.edit_text(
+            text=LEXICON['training_text'].format(current_word),
+            reply_markup=create_training_keyboard(
+                translation, optionals
+            )
+        )
+    except StopIteration:
+        await callback.message.edit_text(
+            text=LEXICON['no_more_words']
+        )
+        await state.clear()
+    except Exception as e:
+        logger.exception(f'Ошибка при обработки правильного ответа, {e}')
 
 
 @router.callback_query(F.data == 'cancel_training', StateFilter(default_state))
