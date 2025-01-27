@@ -81,6 +81,7 @@ async def process_begin_training_press(
     )
 
 
+# Подумать над дублировани кода
 @router.callback_query(
     F.data == 'right_answer', StateFilter(Training.exists_training)
 )
@@ -112,6 +113,13 @@ async def process_right_answer_press(
         await state.clear()
     except Exception as e:
         logger.exception(f'Ошибка при обработки правильного ответа, {e}')
+
+
+@router.callback_query(
+    F.data == 'wrong_answer', StateFilter(Training.exists_training)
+)
+async def process_wrong_answer_press(callback: CallbackQuery):
+    await callback.answer(text=LEXICON['wrong_answer_text'])
 
 
 @router.callback_query(F.data == 'cancel_training', StateFilter(default_state))
