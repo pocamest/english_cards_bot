@@ -164,3 +164,13 @@ async def process_cards(message: Message, session: AsyncSession):
         text=LEXICON['/cards'],
         reply_markup=create_cards_keyboard(word_translations)
     )
+
+
+# сделать кастомный фильтр который будет возвращать номер страницы
+@router.callback_query(F.data.startswith('page:'))
+async def process_pagination_press(callback: CallbackQuery, session: AsyncSession):
+    page = int(callback.data.split(':')[1])
+    word_translations = await get_all_words(session, callback.from_user.id)
+    await callback.message.edit_reply_markup(
+        reply_markup=create_cards_keyboard(word_translations, page)
+    )

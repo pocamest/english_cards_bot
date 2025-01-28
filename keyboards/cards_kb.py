@@ -16,7 +16,7 @@ def create_cards_keyboard(
     kb_builder.row(
         *[InlineKeyboardButton(
             text=f'{word} - {translation}',
-            callback_data=f'del: {word}'
+            callback_data=f'del:{word}'
         ) for word, translation in pagination_words
         ],
         width=1
