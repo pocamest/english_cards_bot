@@ -9,7 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from keyboards import (
     create_beginning_keyboard,
-    create_training_keyboard
+    create_training_keyboard,
+    create_cards_keyboard
 )
 
 from aiogram.fsm.state import default_state
@@ -153,4 +154,13 @@ async def process_end_training_press(
     await state.clear()
     await callback.message.edit_text(
         text=LEXICON['end_training_text']
+    )
+
+
+@router.message(Command(commands=['cards']))
+async def process_cards(message: Message, session: AsyncSession):
+    word_translations = await get_all_words(session, message.from_user.id)
+    await message.answer(
+        text=LEXICON['/cards'],
+        reply_markup=create_cards_keyboard(word_translations)
     )
