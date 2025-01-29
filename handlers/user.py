@@ -18,6 +18,7 @@ from aiogram.fsm.context import FSMContext
 from states import Training, AddingCards
 
 from services import get_translation_optionals
+from filters import IsPage, IsDeleteWord
 
 import logging
 
@@ -166,22 +167,21 @@ async def process_cards(message: Message, session: AsyncSession):
     )
 
 
-# сделать кастомный фильтр который будет возвращать номер страницы
-@router.callback_query(F.data.startswith('page:'))
+@router.callback_query(IsPage())
 async def process_pagination_press(
-    callback: CallbackQuery, session: AsyncSession
+    callback: CallbackQuery, session: AsyncSession, page: int
 ):
-    page = int(callback.data.split(':')[1])
     word_translations = await get_all_words(session, callback.from_user.id)
     await callback.message.edit_reply_markup(
         reply_markup=create_cards_keyboard(word_translations, page)
     )
 
 
-@router.callback_query(F.data.startswith('del:'))
-async def process_delete_word_press(callback: CallbackQuery, session: AsyncSession):
+@router.callback_query(IsDeleteWord())
+async def process_delete_press(
+    callback: CallbackQuery, session: AsyncSession, word: str
+):
     try:
-        word = callback.data.split(':')[1]
         tg_id = callback.from_user.id
         await delete_word(session, tg_id, word)
         await callback.message.edit_text(
