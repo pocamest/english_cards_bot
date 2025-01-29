@@ -161,14 +161,16 @@ async def process_end_training_press(
 async def process_cards(message: Message, session: AsyncSession):
     word_translations = await get_all_words(session, message.from_user.id)
     await message.answer(
-        text=LEXICON['/cards'],
+        text=LEXICON['/cards'].format(len(word_translations)),
         reply_markup=create_cards_keyboard(word_translations)
     )
 
 
 # сделать кастомный фильтр который будет возвращать номер страницы
 @router.callback_query(F.data.startswith('page:'))
-async def process_pagination_press(callback: CallbackQuery, session: AsyncSession):
+async def process_pagination_press(
+    callback: CallbackQuery, session: AsyncSession
+):
     page = int(callback.data.split(':')[1])
     word_translations = await get_all_words(session, callback.from_user.id)
     await callback.message.edit_reply_markup(
@@ -177,7 +179,7 @@ async def process_pagination_press(callback: CallbackQuery, session: AsyncSessio
 
 
 @router.callback_query(F.data.startswith('del:'))
-async def process_delete_word(callback: CallbackQuery, session: AsyncSession):
+async def process_delete_word_press(callback: CallbackQuery, session: AsyncSession):
     try:
         word = callback.data.split(':')[1]
         tg_id = callback.from_user.id
