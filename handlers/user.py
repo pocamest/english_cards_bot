@@ -15,7 +15,7 @@ from keyboards import (
 
 from aiogram.fsm.state import default_state
 from aiogram.fsm.context import FSMContext
-from states import Training
+from states import Training, AddingCards
 
 from services import get_translation_optionals
 
@@ -189,3 +189,11 @@ async def process_delete_word_press(callback: CallbackQuery, session: AsyncSessi
         )
     except Exception as e:
         logger.exception(f'Ошибка при удалении слова {word}, {e}')
+
+
+@router.message(Command(commands=['addcard']), StateFilter(default_state))
+async def process_add_card(
+    message: Message, state: FSMContext
+):
+    await state.set_state(AddingCards.adding_word)
+    await message.answer(text=LEXICON['/add_card'])
