@@ -4,7 +4,7 @@ from aiogram.types import Message, CallbackQuery
 
 from lexicon import LEXICON
 
-from database import add_user, get_all_words
+from database import add_user, get_all_words, delete_word
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from keyboards import (
@@ -174,3 +174,16 @@ async def process_pagination_press(callback: CallbackQuery, session: AsyncSessio
     await callback.message.edit_reply_markup(
         reply_markup=create_cards_keyboard(word_translations, page)
     )
+
+
+@router.callback_query(F.data.startswith('del:'))
+async def process_delete_word(callback: CallbackQuery, session: AsyncSession):
+    try:
+        word = callback.data.split(':')[1]
+        tg_id = callback.from_user.id
+        await delete_word(session, tg_id, word)
+        await callback.message.edit_text(
+            text=LEXICON['delete_word'].format(word)
+        )
+    except Exception as e:
+        logger.exception(f'Ошибка при удалении слова {word}, {e}')

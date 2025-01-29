@@ -68,3 +68,33 @@ async def get_all_words(session: AsyncSession, tg_id: int):
     except SQLAlchemyError as e:
         logger.exception(f'Ошибка при выполнении запроса к базе данных: {e}')
         return {}
+
+
+async def delete_word(session: AsyncSession, tg_id: int, word: str):
+    try:
+        user_word_to_delete = await session.scalar(
+            select(UserWord)
+            .join(User, UserWord.user_id == User.id)
+            .filter(User.tg_id == tg_id, UserWord.word == word)
+        )
+        if user_word_to_delete:
+            await session.delete(user_word_to_delete)
+            await session.commit()
+            return
+
+        default_word_to_delete = await session.scalar(
+            select(DefaultWord)
+            .filter(DefaultWord.word == word)
+        )
+        user_id = await session.scalar(
+            select(User.id).filter(User.tg_id == tg_id)
+        )
+        user_ignored_word = UserIgnoredWord(
+            user_id=user_id,
+            word_id=default_word_to_delete.id
+        )
+        session.add(user_ignored_word)
+        await session.commit()
+    except SQLAlchemyError as e:
+        logger.exception(f'Ошибка при удаления слова, {e}')
+        await session.rollback()
