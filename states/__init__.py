@@ -1,1 +1,1 @@
-from .states import Training
+from .states import Training, AddingCards
