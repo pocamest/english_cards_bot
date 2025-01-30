@@ -1,1 +1,4 @@
-from .filters import IsPage, IsDeleteWord
+from .filters import (
+    IsPage, IsDeleteWord,
+    IsCorrectWord, IsCorrectTranslation
+)
