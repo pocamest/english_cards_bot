@@ -1,4 +1,5 @@
 from .filters import (
     IsPage, IsDeleteWord,
-    IsCorrectWord, IsCorrectTranslation
+    IsCorrectWord, IsWordNotExists,
+    IsCorrectTranslation
 )

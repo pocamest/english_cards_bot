@@ -1,5 +1,7 @@
 from aiogram.filters import BaseFilter
 from aiogram.types import Message, CallbackQuery
+from sqlalchemy.ext.asyncio import AsyncSession
+from database import word_exists
 import re
 
 
@@ -17,8 +19,7 @@ class IsPage(BaseFilter):
         if name == 'page' and page.isdigit():
             return {'page': int(page)}
 
-        else:
-            return False
+        return False
 
 
 class IsDeleteWord(BaseFilter):
@@ -34,23 +35,32 @@ class IsDeleteWord(BaseFilter):
         if name == 'del':
             return {'word': word}
 
-        else:
-            return False
+        return False
 
 
 class IsCorrectWord(BaseFilter):
     async def __call__(self, message: Message) -> dict[str, str] | bool:
         word = message.text.strip()
-        if word and bool(re.fullmatch(r'^[А-Яа-яёЁ- ]+$', word)):
+        if word and bool(re.fullmatch(r'^[А-Яа-яёЁ -]+$', word)):
             return {'word': word.lower()}
-        else:
+        return False
+
+
+class IsWordNotExists(BaseFilter):
+    async def __call__(
+        self, message: Message, session: AsyncSession
+    ) -> dict[str, str] | bool:
+        word = message.text.strip()
+        tg_id = message.from_user.id
+        flag = await word_exists(session, tg_id, word)
+        if flag:
             return False
+        return True
 
 
 class IsCorrectTranslation(BaseFilter):
     async def __call__(self, message: Message) -> dict[str, str] | bool:
         translation = message.text.strip()
-        if translation and bool(re.fullmatch(r"^[A-Za-z'- ]+$", translation)):
+        if translation and bool(re.fullmatch(r"^[A-Za-z' -]+$", translation)):
             return {'translation': translation.lower()}
-        else:
-            return False
+        return False

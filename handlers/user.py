@@ -4,7 +4,11 @@ from aiogram.types import Message, CallbackQuery
 
 from lexicon import LEXICON
 
-from database import add_user, get_all_words, delete_word
+from database import (
+    add_user, get_all_words,
+    delete_word, add_card
+)
+
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from keyboards import (
@@ -18,7 +22,10 @@ from aiogram.fsm.context import FSMContext
 from states import Training, AddingCards
 
 from services import get_translation_optionals
-from filters import IsPage, IsDeleteWord
+from filters import (
+    IsPage, IsDeleteWord, IsCorrectWord,
+    IsWordNotExists, IsCorrectTranslation
+)
 
 import logging
 
@@ -191,9 +198,55 @@ async def process_delete_press(
         logger.exception(f'Ошибка при удалении слова {word}, {e}')
 
 
+# Добавить кнопку отмены добовления карточки
 @router.message(Command(commands=['addcard']), StateFilter(default_state))
-async def process_add_card(
+async def process_addcard(
     message: Message, state: FSMContext
 ):
     await state.set_state(AddingCards.adding_word)
-    await message.answer(text=LEXICON['/add_card'])
+    await message.answer(text=LEXICON['/addcard'])
+
+
+@router.message(
+    StateFilter(AddingCards.adding_word),
+    IsCorrectWord(), IsWordNotExists()
+)
+async def process_correct_word(message: Message, state: FSMContext, word: str):
+    await state.update_data(word=word)
+    await state.set_state(AddingCards.adding_translation)
+    await message.answer(text=LEXICON['correct_word'])
+
+
+@router.message(
+    StateFilter(AddingCards.adding_word), IsCorrectWord(), ~IsWordNotExists()
+)
+async def process_word_exists(message: Message):
+    await message.answer(text=LEXICON['word_exists'])
+
+
+
+@router.message(StateFilter(AddingCards.adding_word))
+async def process_incorrect_word(message: Message):
+    await message.answer(text=LEXICON['incorrect_word'])
+
+
+@router.message(
+    StateFilter(AddingCards.adding_translation), IsCorrectTranslation()
+)
+async def process_correct_translation(
+    message: Message, session: AsyncSession,
+    state: FSMContext, translation: str
+):
+    data = await state.get_data()
+    word = data['word']
+    tg_id = message.from_user.id
+    await add_card(session, tg_id, word, translation)
+    await state.clear()
+    await message.answer(
+        text=LEXICON['correct_translation'].format(word, translation)
+        )
+
+
+@router.message(StateFilter(AddingCards.adding_translation))
+async def process_incorrect_translation(message: Message):
+    await message.answer(text=LEXICON['incorrect_translation'])

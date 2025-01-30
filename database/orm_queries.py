@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.future import select
-from sqlalchemy import union_all
+from sqlalchemy import union_all, exists, or_
 
 from database import User, UserWord, DefaultWord, UserIgnoredWord
 import logging
@@ -58,7 +58,7 @@ async def get_all_words(session: AsyncSession, tg_id: int):
                 (DefaultWord.id == UserIgnoredWord.word_id) &
                 (UserIgnoredWord.user_id == user_id)
             )
-            .filter(UserIgnoredWord.id == None)
+            .filter(UserIgnoredWord.id.is_(None))
         )
         union_query = union_all(user_words_query, default_words_query)
         result = await session.execute(union_query)
@@ -98,3 +98,57 @@ async def delete_word(session: AsyncSession, tg_id: int, word: str):
     except SQLAlchemyError as e:
         logger.exception(f'Ошибка при удаления слова, {e}')
         await session.rollback()
+
+
+# потом переделать
+async def word_exists(session: AsyncSession, tg_id: int, word: str):
+    try:
+        user_id = await session.scalar(
+            select(User.id).filter(User.tg_id == tg_id)
+        )
+
+        user_words_query = (
+            select(UserWord.word)
+            .filter(UserWord.user_id == user_id, UserWord.word == word)
+        )
+
+        default_words_query = (
+            select(DefaultWord.word)
+            .outerjoin(
+                UserIgnoredWord,
+                (DefaultWord.id == UserIgnoredWord.word_id) &
+                (UserIgnoredWord.user_id == user_id)
+            )
+            .filter(
+                DefaultWord.word == word,
+                UserIgnoredWord.id.is_(None)
+            )
+        )
+
+        union_query = union_all(user_words_query, default_words_query)
+        result = await session.scalar(select(union_query.exists()))
+
+        return bool(result)
+    except SQLAlchemyError as e:
+        logger.exception(f'Ошибка при проверки наличия слова {word}, {e}')
+        return False
+
+
+async def add_card(
+    session: AsyncSession, tg_id: int,
+    word: str, translation: str
+):
+    try:
+        user_id = await session.scalar(
+            select(User.id).filter(User.tg_id == tg_id)
+        )
+        user_word = UserWord(
+            word=word,
+            translation=translation,
+            user_id=user_id
+        )
+        session.add(user_word)
+        await session.commit()
+
+    except SQLAlchemyError as e:
+        logger.exception(f'Ошибка при добавления слова {word}, {e}')
