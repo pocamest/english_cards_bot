@@ -250,3 +250,13 @@ async def process_correct_translation(
 @router.message(StateFilter(AddingCards.adding_translation))
 async def process_incorrect_translation(message: Message):
     await message.answer(text=LEXICON['incorrect_translation'])
+
+
+@router.message(Command(commands=['reset']))
+async def process_clear(message):
+    await message.answer(
+        text=LEXICON['/reset'],
+        reply_markup=create_beginning_keyboard(
+            'reset_changes', 'cancel_reset'
+        )
+    )
