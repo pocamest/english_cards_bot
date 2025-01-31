@@ -205,7 +205,18 @@ async def process_addcard(
     message: Message, state: FSMContext
 ):
     await state.set_state(AddingCards.adding_word)
-    await message.answer(text=LEXICON['/addcard'])
+    await message.answer(
+        text=LEXICON['/addcard'],
+        reply_markup=create_generic_keyboard('addcard_cancel')
+    )
+
+
+@router.callback_query(F.data == 'addcard_cancel')
+async def process_addcard_cancel_press(
+    callback: CallbackQuery, state: FSMContext
+):
+    await state.clear()
+    await callback.message.edit_text(text=LEXICON['addcard_cancel_text'])
 
 
 @router.message(
@@ -215,20 +226,29 @@ async def process_addcard(
 async def process_correct_word(message: Message, state: FSMContext, word: str):
     await state.update_data(word=word)
     await state.set_state(AddingCards.adding_translation)
-    await message.answer(text=LEXICON['correct_word'])
+    await message.answer(
+        text=LEXICON['correct_word'],
+        reply_markup=create_generic_keyboard('addcard_cancel')
+    )
 
 
 @router.message(
     StateFilter(AddingCards.adding_word), IsCorrectWord(), ~IsWordNotExists()
 )
 async def process_word_exists(message: Message):
-    await message.answer(text=LEXICON['word_exists'])
+    await message.answer(
+        text=LEXICON['word_exists'],
+        reply_markup=create_generic_keyboard('addcard_cancel')
+    )
 
 
 
 @router.message(StateFilter(AddingCards.adding_word))
 async def process_incorrect_word(message: Message):
-    await message.answer(text=LEXICON['incorrect_word'])
+    await message.answer(
+        text=LEXICON['incorrect_word'],
+        reply_markup=create_generic_keyboard('addcard_cancel')
+    )
 
 
 @router.message(
@@ -250,7 +270,10 @@ async def process_correct_translation(
 
 @router.message(StateFilter(AddingCards.adding_translation))
 async def process_incorrect_translation(message: Message):
-    await message.answer(text=LEXICON['incorrect_translation'])
+    await message.answer(
+        text=LEXICON['incorrect_translation'],
+        reply_markup=create_generic_keyboard('addcard_cancel')
+    )
 
 
 @router.message(Command(commands=['reset']))
