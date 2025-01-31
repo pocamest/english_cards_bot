@@ -12,7 +12,7 @@ from database import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from keyboards import (
-    create_beginning_keyboard,
+    create_generic_keyboard,
     create_training_keyboard,
     create_cards_keyboard
 )
@@ -60,7 +60,7 @@ async def process_beginning_without_training(
         text=LEXICON['/beginning_without_training'].format(
             len(word_translations)
         ),
-        reply_markup=create_beginning_keyboard(
+        reply_markup=create_generic_keyboard(
             'begin_training', 'cancel_training'
         )
     )
@@ -149,7 +149,7 @@ async def process_cancel_training_press(
 async def process_beginning_with_training(message: Message):
     await message.answer(
         text=LEXICON['/beginning_with_training'],
-        reply_markup=create_beginning_keyboard('begin_new_training')
+        reply_markup=create_generic_keyboard('begin_new_training')
     )
 
 
@@ -256,7 +256,7 @@ async def process_incorrect_translation(message: Message):
 async def process_clear(message):
     await message.answer(
         text=LEXICON['/reset'],
-        reply_markup=create_beginning_keyboard(
+        reply_markup=create_generic_keyboard(
             'reset_changes', 'cancel_reset'
         )
     )
