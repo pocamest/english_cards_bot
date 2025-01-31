@@ -20,11 +20,11 @@ async def add_user(session: AsyncSession, user_name: str, tg_id: int):
             session.add(new_user)
             await session.commit()
             logger.debug(f'Добавлен пользователь {new_user!r}')
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             await session.rollback()
             logger.exception(
                 f'Ошибка при добавлении пользователя {user_name!r},'
-                f' tg_id={tg_id}: {e}'
+                f' tg_id={tg_id}'
             )
 
 
@@ -35,10 +35,10 @@ async def add_default_words(
         default_words = [DefaultWord(**word_pair) for word_pair in word_pairs]
         session.add_all(default_words)
         await session.commit()
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         await session.rollback()
         logger.exception(
-            f'Ошибка при добавлении карточек по умолчанию: {e}'
+            'Ошибка при добавлении карточек по умолчанию'
         )
 
 
@@ -65,8 +65,8 @@ async def get_all_words(session: AsyncSession, tg_id: int):
         result_list = result.fetchall()
         random.shuffle(result_list)
         return dict(result_list)
-    except SQLAlchemyError as e:
-        logger.exception(f'Ошибка при выполнении запроса к базе данных: {e}')
+    except SQLAlchemyError:
+        logger.exception('Ошибка при выполнении запроса к базе данных')
         return {}
 
 
@@ -95,8 +95,8 @@ async def delete_word(session: AsyncSession, tg_id: int, word: str):
         )
         session.add(user_ignored_word)
         await session.commit()
-    except SQLAlchemyError as e:
-        logger.exception(f'Ошибка при удаления слова, {e}')
+    except SQLAlchemyError:
+        logger.exception('Ошибка при удаления слова')
         await session.rollback()
 
 
@@ -129,8 +129,8 @@ async def word_exists(session: AsyncSession, tg_id: int, word: str):
         result = await session.scalar(select(union_query.exists()))
 
         return bool(result)
-    except SQLAlchemyError as e:
-        logger.exception(f'Ошибка при проверки наличия слова {word}, {e}')
+    except SQLAlchemyError:
+        logger.exception(f'Ошибка при проверки наличия слова {word}')
         return False
 
 
@@ -150,9 +150,9 @@ async def add_card(
         session.add(user_word)
         await session.commit()
 
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         await session.rollback()
-        logger.exception(f'Ошибка при добавления слова {word}, {e}')
+        logger.exception(f'Ошибка при добавления слова {word}')
 
 
 async def clear_user_changes(
@@ -172,8 +172,8 @@ async def clear_user_changes(
 
         await session.commit()
 
-    except SQLAlchemyError as e:
+    except SQLAlchemyError:
         await session.rollback()
         logger.exception(
-            f'Ошибка при удалении пользовательских изменений, {e}'
+            'Ошибка при удалении пользовательских изменений'
         )

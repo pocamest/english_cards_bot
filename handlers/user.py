@@ -43,8 +43,8 @@ async def process_start(message: Message, session: AsyncSession):
             tg_id=message.from_user.id
         )
         await message.answer(text=LEXICON['/start'])
-    except Exception as e:
-        logger.exception(f'Ошибка при обработке команды /start: {e}')
+    except Exception:
+        logger.exception('Ошибка при обработке команды /start')
 
 
 @router.message(Command(commands=['help']))
@@ -126,8 +126,8 @@ async def process_right_answer_press(
             text=LEXICON['no_more_words']
         )
         await state.clear()
-    except Exception as e:
-        logger.exception(f'Ошибка при обработки правильного ответа, {e}')
+    except Exception:
+        logger.exception('Ошибка при обработки правильного ответа')
 
 
 @router.callback_query(
@@ -195,8 +195,8 @@ async def process_delete_press(
         await callback.message.edit_text(
             text=LEXICON['delete_word'].format(word)
         )
-    except Exception as e:
-        logger.exception(f'Ошибка при удалении слова {word}, {e}')
+    except Exception:
+        logger.exception(f'Ошибка при удалении слова {word}')
 
 
 # Добавить кнопку отмены добовления карточки
