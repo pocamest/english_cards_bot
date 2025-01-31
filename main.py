@@ -39,9 +39,8 @@ async def main():
     dp.include_router(router)
 
     await db.create_db()
-    if False:
-        async with session_factory() as session:
-            await add_default_words(session, DEFAULT_WORDS)
+    async with session_factory() as session:
+        await add_default_words(session, DEFAULT_WORDS)
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 
