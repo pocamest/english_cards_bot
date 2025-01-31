@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.future import select
-from sqlalchemy import union_all, exists, or_
+from sqlalchemy import union_all, delete
 
 from database import User, UserWord, DefaultWord, UserIgnoredWord
 import logging
@@ -151,4 +151,29 @@ async def add_card(
         await session.commit()
 
     except SQLAlchemyError as e:
+        await session.rollback()
         logger.exception(f'Ошибка при добавления слова {word}, {e}')
+
+
+async def clear_user_changes(
+    session: AsyncSession, tg_id: int
+):
+    try:
+        user_id = await session.scalar(
+            select(User.id).filter(User.tg_id == tg_id)
+        )
+
+        await session.execute(
+            delete(UserWord).where(UserWord.user_id == user_id)
+        )
+        await session.execute(
+            delete(UserIgnoredWord).where(UserIgnoredWord.user_id == user_id)
+        )
+
+        await session.commit()
+
+    except SQLAlchemyError as e:
+        await session.rollback()
+        logger.exception(
+            f'Ошибка при удалении пользовательских изменений, {e}'
+        )

@@ -6,7 +6,8 @@ from lexicon import LEXICON
 
 from database import (
     add_user, get_all_words,
-    delete_word, add_card
+    delete_word, add_card,
+    clear_user_changes
 )
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -95,7 +96,7 @@ async def process_begin_training_press(
     )
 
 
-# Подумать над дублировани кода
+# Подумать над дублированием кода
 @router.callback_query(
     F.data == 'right_answer', StateFilter(Training.exists_training)
 )
@@ -259,4 +260,22 @@ async def process_clear(message):
         reply_markup=create_generic_keyboard(
             'reset_changes', 'cancel_reset'
         )
+    )
+
+
+@router.callback_query(F.data == 'reset_changes')
+async def process_reset_changes_press(
+    callback: CallbackQuery, session: AsyncSession
+):
+    tg_id = callback.from_user.id
+    await clear_user_changes(session, tg_id)
+    await callback.message.edit_text(
+        text=LEXICON['reset_changes_text']
+    )
+
+
+@router.callback_query(F.data == 'cancel_reset')
+async def process_cancel_reset_press(callback: CallbackQuery):
+    await callback.message.edit_text(
+        text=LEXICON['cancel_reset_text']
     )
