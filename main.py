@@ -8,32 +8,9 @@ from config_data import load_config, Config
 from handlers import router
 from middlewares import DataBaseMiddleware
 from keyboards import set_main_menu
+from services import DEFAULT_WORDS
 
 logger = logging.getLogger(__name__)
-
-DEFAULT_WORDS = [
-    {"word": "белый", "translation": "white"},
-    {"word": "чёрный", "translation": "black"},
-    {"word": "красный", "translation": "red"},
-    {"word": "синий", "translation": "blue"},
-    {"word": "зелёный", "translation": "green"},
-    {"word": "жёлтый", "translation": "yellow"},
-    {"word": "оранжевый", "translation": "orange"},
-    {"word": "фиолетовый", "translation": "purple"},
-    {"word": "розовый", "translation": "pink"},
-    {"word": "серый", "translation": "gray"},
-    {"word": "коричневый", "translation": "brown"},
-    {"word": "бирюзовый", "translation": "turquoise"},
-    {"word": "голубой", "translation": "light blue"},
-    {"word": "золотистый", "translation": "golden"},
-    {"word": "лимонный", "translation": "lemon"},
-    {"word": "малиновый", "translation": "raspberry"},
-    {"word": "оливковый", "translation": "olive"},
-    {"word": "салатовый", "translation": "salad green"},
-    {"word": "сиреневый", "translation": "lilac"},
-    {"word": "темно-синий", "translation": "navy blue"},
-    {"word": "бледно-розовый", "translation": "pale pink"}
-]
 
 
 async def main():
