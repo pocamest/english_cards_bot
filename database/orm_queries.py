@@ -28,20 +28,6 @@ async def add_user(session: AsyncSession, user_name: str, tg_id: int):
             )
 
 
-async def add_default_words(
-    session: AsyncSession, word_pairs: list[dict[str, str]]
-):
-    try:
-        default_words = [DefaultWord(**word_pair) for word_pair in word_pairs]
-        session.add_all(default_words)
-        await session.commit()
-    except SQLAlchemyError:
-        await session.rollback()
-        logger.exception(
-            'Ошибка при добавлении карточек по умолчанию'
-        )
-
-
 async def get_all_words(session: AsyncSession, tg_id: int):
     try:
         user_query = select(User.id).filter_by(tg_id=tg_id)
