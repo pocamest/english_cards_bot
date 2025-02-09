@@ -3,12 +3,11 @@ import logging
 
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
-from database import DataBase, add_default_words
+from database import DataBase
 from config_data import load_config, Config
 from handlers import router
 from middlewares import DataBaseMiddleware
 from keyboards import set_main_menu
-from services import DEFAULT_WORDS
 
 logger = logging.getLogger(__name__)
 
@@ -38,9 +37,6 @@ async def main():
     dp.update.middleware(DataBaseMiddleware(session_factory))
     dp.include_router(router)
 
-    await db.create_db()
-    async with session_factory() as session:
-        await add_default_words(session, DEFAULT_WORDS)
     await bot.delete_webhook(drop_pending_updates=True)
     await dp.start_polling(bot)
 

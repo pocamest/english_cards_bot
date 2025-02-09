@@ -14,4 +14,3 @@ class DataBase:
         self.session_factory = async_sessionmaker(
             bind=self.engine, class_=AsyncSession, expire_on_commit=False
         )
-
