@@ -10,14 +10,37 @@ from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
 
-from services import DEFAULT_WORDS
-
 
 # revision identifiers, used by Alembic.
 revision: str = '44da25e4a572'
 down_revision: Union[str, None] = 'd4312389ec07'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
+
+
+DEFAULT_WORDS = [
+    {"word": "белый", "translation": "white"},
+    {"word": "чёрный", "translation": "black"},
+    {"word": "красный", "translation": "red"},
+    {"word": "синий", "translation": "blue"},
+    {"word": "зелёный", "translation": "green"},
+    {"word": "жёлтый", "translation": "yellow"},
+    {"word": "оранжевый", "translation": "orange"},
+    {"word": "фиолетовый", "translation": "purple"},
+    {"word": "розовый", "translation": "pink"},
+    {"word": "серый", "translation": "gray"},
+    {"word": "коричневый", "translation": "brown"},
+    {"word": "бирюзовый", "translation": "turquoise"},
+    {"word": "голубой", "translation": "light blue"},
+    {"word": "золотистый", "translation": "golden"},
+    {"word": "лимонный", "translation": "lemon"},
+    {"word": "малиновый", "translation": "raspberry"},
+    {"word": "оливковый", "translation": "olive"},
+    {"word": "салатовый", "translation": "salad green"},
+    {"word": "сиреневый", "translation": "lilac"},
+    {"word": "темно-синий", "translation": "navy blue"},
+    {"word": "бледно-розовый", "translation": "pale pink"}
+]
 
 
 def upgrade() -> None:
